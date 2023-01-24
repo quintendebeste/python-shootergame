@@ -8,6 +8,7 @@ x,y = (1920, 1020)
 window = pg.display.set_mode((x, y))
 red = (255,0,0)
 white = (255,255,255)
+ballshot = False
 
 pg.mouse.set_visible(False)
 
@@ -29,13 +30,29 @@ def create_ball(space):
 balls = []
 balls.append(create_ball(space))
 
-def draw_balls(balls):
+def draw_balls(balls,ballshot):
+    ballshot = ballshot
     for ball in balls:      
         x_pos = int(ball.body.position.x)
         y_pos = int(ball.body.position.y)
         pg.draw.circle(window, red, (x_pos, y_pos), 50)
-    if(y_pos >= y + 50):
+    if(y_pos >= y + 50 or ballshot == True):
         balls.append(create_ball(space))
+        ballshot = False
+    return x_pos,y_pos,ballshot
+
+def colision(m_posX,m_posY,ballpos_X,ballpos_Y,ballshot,pointcounter):
+    m_posX = m_posX
+    m_posY = m_posY
+    ballpos_X = ballpos_X
+    ballpos_Y = ballpos_Y
+    ballshot = ballshot
+    print(m_posX,m_posY,ballpos_X,ballpos_Y)
+    if(m_posX <= (ballpos_X + 50) and m_posX >= (ballpos_X - 50) and m_posY <= (ballpos_Y + 50) and m_posY >= (ballpos_Y - 50)):
+        ballshot = True
+        pointcounter += 1
+        draw_balls(balls,ballshot)
+    return pointcounter
 
 
 font = pg.font.SysFont('Corbel',100)
@@ -43,7 +60,7 @@ pointcounter = 0
 
 running = True
 while running:
-
+    print(ballshot)
     #image handling
     img_gun = pg.image.load("C:\\Users\\quint\\Desktop\\python\\image\\"+ active_img).convert_alpha()
     img_crossair = pg.image.load("C:\\Users\\quint\\Desktop\\python\\image\\crossair.png").convert_alpha()
@@ -75,12 +92,13 @@ while running:
     pressed = pg.mouse.get_pressed()[0]
     if pressed:
         active_img = active_img_shoot
+        pointcounter = colision(m_posX,m_posY,ballpos_X,ballpos_Y,ballshot,pointcounter)
 
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
 
-    draw_balls(balls)
+    ballpos_X,ballpos_Y,ballshot = draw_balls(balls,ballshot)
     window.blit(img_gun, (m_posX - (img_gun.get_width()/2), img_gun_posY))
     window.blit(img_crossair, (m_posX - (img_crossair.get_width()/2), m_posY - (img_crossair.get_height()/2)))
     window.blit(text , ((100) - 25,25))
